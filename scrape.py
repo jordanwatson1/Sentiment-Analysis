@@ -32,20 +32,22 @@ def user_category():
     return "food " + input("Enter one or more food categories separated by a space: ")
 
 
-def enter_category(soup, category):
+def enter_category(driver, category):
     """
     Enters the categories into the search bar of Pinterest to search for
     the related pins in that category.
-    :param soup:
     :param category:
     :return: the new url with the specified categories
     """
-    empty_search_bar = soup.find('body')
-    print(empty_search_bar)
-    # print()
-    # search_bar_input = empty_search_bar.find(value="".replace_with(category))
-    # print(search_bar_input)
-    return
+    search_bar = WebDriverWait(driver, 30).until(EC.visibility_of_element_located(
+        (By.XPATH, '//*[@id="searchBoxContainer"]/div/div/div[2]/input')))
+
+    if not search_bar:
+        raise RuntimeError("Could not find search bar.")
+
+    search_bar.send_keys(category)
+    search_bar.send_keys(Keys.ENTER)
+
 
 def get_username_and_pass():
     """TODO: find a more secure way of doing this"""
@@ -62,7 +64,6 @@ def log_in(driver, credentials):
     # log in
     login_element = WebDriverWait(driver, 30).until(EC.visibility_of_element_located(
         (By.XPATH, '//*[@id="fullpage-wrapper"]/div[1]/div/div/div[1]/div//div[2]/div[2]/button/div')))
-    # print(login_element)
 
     if not login_element:
         raise RuntimeError("Could not find login button.")
@@ -106,6 +107,8 @@ def main():
 
     # log in to Pinterest
     log_in(driver, credentials)
+
+    enter_category(driver, category)
 
     time.sleep((60))
     driver.quit()
